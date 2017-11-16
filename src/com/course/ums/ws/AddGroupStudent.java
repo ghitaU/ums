@@ -1,38 +1,40 @@
 package com.course.ums.ws;
 
-import com.course.ums.auth.AuthManager;
 import com.course.ums.db.DBManager;
 import org.json.JSONObject;
+import spark.Request;
+import spark.Response;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
-import static com.course.ums.auth.AuthManager.result;
-
-public class AddGroupStudent extends JSONRoute {
+public class AddGroupStudent extends MyRoute {
     @Override
-    public JSONObject handleJSONRequest(JSONObject request) throws Exception {
+    public Object myHandle(Request request, Response response) throws Exception {
+        JSONObject json = new JSONObject(request.body());
+        JSONObject result = new JSONObject();
+        JSONObject id = new JSONObject();
 
-        String token = request.getString("token");
-        if (!DBManager.validateToken(token, AuthManager.ROLE_ADMIN)) {
-            throw new RuntimeException("Unauthorized!");
-        }
-
+        int token = json.getInt("token");
         Statement statement = DBManager.getConnection().createStatement();
-        ResultSet rs;
-
-        PreparedStatement ps = DBManager.getConnection().prepareStatement("INSERT INTO group_students(groups_id,students_id,semesters_id) VALUES(?,?,?)", PreparedStatement.RETURN_GENERATED_KEYS);
-        ps.setString(1, String.valueOf(request.getInt("groups_id")));
-        ps.setString(2, String.valueOf(request.getInt("students_id")));
-        ps.setString(2, String.valueOf(request.getInt("semesters_id")));
-        ps.execute();
-        rs = ps.getGeneratedKeys();
-
-        rs.next();
-        int id = rs.getInt("id");
-        result.put("id", id);
-
+        ResultSet resultSet = statement.executeQuery("SELECT * FROM administrators WHERE id = '"+token+"';");
+        if(resultSet.first()) {
+            PreparedStatement preparedStatement = DBManager.getConnection().prepareStatement("INSERT INTO group_students(groups_id,students_id,semesters_id) VALUES(?,?,?)", PreparedStatement.RETURN_GENERATED_KEYS);
+            preparedStatement.setString(1, String.valueOf(json.getInt("groups_id")));
+            preparedStatement.setString(2, String.valueOf(json.getInt("students_id")));
+            preparedStatement.setString(2, String.valueOf(json.getInt("semesters_id")));
+            preparedStatement.execute();
+            resultSet = preparedStatement.getGeneratedKeys();
+            if (resultSet.next()) {
+                id.put("id", resultSet.getInt(1));
+                result.put("result", id.getInt("id"));
+            } else {
+                result.put("result", "Unsuccessful insertion! Try again!");
+            }
+        }else {
+            result.put("rezult","You enter a wrong token!!");
+        }
         return result;
     }
 }

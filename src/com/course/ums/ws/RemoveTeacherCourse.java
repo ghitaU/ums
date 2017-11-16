@@ -1,6 +1,5 @@
 package com.course.ums.ws;
 
-import com.course.ums.auth.AuthManager;
 import com.course.ums.db.DBManager;
 import org.json.JSONObject;
 import spark.Request;
@@ -10,29 +9,33 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
-import static com.course.ums.auth.AuthManager.result;
-
-public class RemoveTeacherCourse extends JSONRoute {
+public class RemoveTeacherCourse extends MyRoute
+{
     @Override
-    public JSONObject handleJSONRequest(JSONObject request) throws Exception {
-        String token = request.getString("token");
-        if (!DBManager.validateToken(token, AuthManager.ROLE_ADMIN)) {
-            throw new RuntimeException("Unauthorized!");
-        }
+    public Object myHandle(Request request, Response response) throws Exception {
+        JSONObject json = new JSONObject(request.body());
+        JSONObject result = new JSONObject();
+        JSONObject id = new JSONObject();
 
+        int token = json.getInt("token");
         Statement statement = DBManager.getConnection().createStatement();
-        ResultSet rs;
+        ResultSet resultSet = statement.executeQuery("SELECT * FROM administrators WHERE id = '"+token+"';");
+        if(resultSet.first()) {
+            PreparedStatement preparedStatement = DBManager.getConnection().prepareStatement("DELETE FROM teachers_courses where teachers_id = (?) and courses_id = (?)", PreparedStatement.RETURN_GENERATED_KEYS);
+            preparedStatement.setString(1, String.valueOf(json.getInt("teachers_id")));
+            preparedStatement.setString(2, String.valueOf(json.getInt("courses_id")));
 
-        PreparedStatement ps = DBManager.getConnection().prepareStatement("DELETE FROM teachers_courses where teachers_id = (?) and courses_id = (?)", PreparedStatement.RETURN_GENERATED_KEYS);
-        ps.setString(1, String.valueOf(request.getInt("teachers_id")));
-        ps.setString(2, String.valueOf(request.getInt("courses_id")));
-
-        ps.execute();
-        rs = ps.getGeneratedKeys();
-        rs.next();
-        int id = rs.getInt("id");
-        result.put("id", id);
-
+            preparedStatement.execute();
+            resultSet = preparedStatement.getGeneratedKeys();
+            if (resultSet.next()) {
+                id.put("id", resultSet.getInt(1));
+                result.put("result", id.getInt("id"));
+            } else {
+                result.put("result", "Unsuccessful insertion! Try again!");
+            }
+        }else {
+            result.put("rezult","You enter a wrong token!!");
+        }
         return result;
     }
 }

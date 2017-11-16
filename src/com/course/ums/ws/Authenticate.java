@@ -11,7 +11,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-public class Authenticate extends JSONRoute {
+public class Authenticate extends MyRoute {
     @Override
     public Object myHandle(Request request, Response response) throws Exception {
         JSONObject json = new JSONObject(request.body());

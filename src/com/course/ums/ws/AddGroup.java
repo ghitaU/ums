@@ -9,7 +9,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
-public class RemoveGroupTeacher extends MyRoute {
+public class AddGroup extends MyRoute {
     @Override
     public Object myHandle(Request request, Response response) throws Exception {
         JSONObject json = new JSONObject(request.body());
@@ -20,9 +20,9 @@ public class RemoveGroupTeacher extends MyRoute {
         Statement statement = DBManager.getConnection().createStatement();
         ResultSet resultSet = statement.executeQuery("SELECT * FROM administrators WHERE id = '"+token+"';");
         if(resultSet.first()) {
-            PreparedStatement preparedStatement = DBManager.getConnection().prepareStatement("DELETE FROM group_teacher_courses WHERE groups_id = (?) and teachers_courses_id = (?) ", PreparedStatement.RETURN_GENERATED_KEYS);
-            preparedStatement.setString(1, String.valueOf(json.getInt("groups_id")));
-            preparedStatement.setString(2, String.valueOf(json.getInt("teachers_courses_id")));
+            PreparedStatement preparedStatement = DBManager.getConnection().prepareStatement("INSERT INTO groups(semester_id) VALUES(?)", PreparedStatement.RETURN_GENERATED_KEYS);
+            preparedStatement.setString(1, String.valueOf(json.getInt("semester_id")));
+;
             preparedStatement.execute();
             resultSet = preparedStatement.getGeneratedKeys();
             if (resultSet.next()) {
