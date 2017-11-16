@@ -1,40 +1,38 @@
 package com.course.ums.ws;
 
+import com.course.ums.auth.AuthManager;
 import com.course.ums.db.DBManager;
 import org.json.JSONObject;
-import spark.Request;
-import spark.Response;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
-public class AddExam extends MyRoute {
-    @Override
-    public Object myHandle(Request request, Response response) throws Exception {
-        JSONObject json = new JSONObject(request.body());
-        JSONObject result = new JSONObject();
-        JSONObject id = new JSONObject();
+import static com.course.ums.auth.AuthManager.result;
 
-        int token = json.getInt("token");
-        Statement statement = DBManager.getConnection().createStatement();
-        ResultSet resultSet = statement.executeQuery("SELECT * FROM teachers WHERE id = '"+token+"';");
-        if(resultSet.first()) {
-            PreparedStatement preparedStatement = DBManager.getConnection().prepareStatement("INSERT INTO exams(date,semesters_id,courses_id) VALUES(?,?,?)", PreparedStatement.RETURN_GENERATED_KEYS);
-            preparedStatement.setString(1, String.valueOf(json.getString("date")));
-            preparedStatement.setString(2, String.valueOf(json.getInt("semester_id")));
-            preparedStatement.setString(2, String.valueOf(json.getInt("course_id")));
-            preparedStatement.execute();
-            resultSet = preparedStatement.getGeneratedKeys();
-            if (resultSet.next()) {
-                id.put("id", resultSet.getInt(1));
-                result.put("result", id.getInt("id"));
-            } else {
-                result.put("result", "Unsuccessful insertion! Try again!");
-            }
-        }else {
-            result.put("rezult","You enter a wrong token!!");
+public class AddExam extends JSONRoute {
+    @Override
+    public JSONObject handleJSONRequest(JSONObject request) throws Exception {
+
+        String token = request.getString("token");
+        if (!DBManager.validateToken(token, AuthManager.ROLE_TEACHER)) {
+            throw new RuntimeException("Unauthorized!");
         }
+
+        Statement statement = DBManager.getConnection().createStatement();
+        ResultSet rs;
+        PreparedStatement ps = DBManager.getConnection().prepareStatement("INSERT INTO exams(date,semesters_id,courses_id) VALUES(?,?,?,?)", PreparedStatement.RETURN_GENERATED_KEYS);
+        ps.setString(1, String.valueOf(request.getString("date")));
+        ps.setString(2, String.valueOf(request.getInt("semester_id")));
+        ps.setString(3, String.valueOf(request.getInt("teachers_courses_id")));
+        ps.setString(4, String.valueOf(request.getInt("groups_id")));
+        ps.execute();
+        rs = ps.getGeneratedKeys();
+
+        rs.next();
+        int id = rs.getInt("id");
+        result.put("id", id);
+
         return result;
     }
 }

@@ -10,7 +10,7 @@ import java.sql.Statement;
 
 import static com.course.ums.auth.AuthManager.result;
 
-public class RemoveGroupStudent extends JSONRoute {
+public class SemesterAdd extends JSONRoute {
     @Override
     public JSONObject handleJSONRequest(JSONObject request) throws Exception {
 
@@ -22,13 +22,12 @@ public class RemoveGroupStudent extends JSONRoute {
         Statement statement = DBManager.getConnection().createStatement();
         ResultSet rs;
 
-        PreparedStatement ps = DBManager.getConnection().prepareStatement("DELETE FROM group_students where groups_id = (?) end students_id = (?) and semesters_id = (?) VALUES(?,?,?)", PreparedStatement.RETURN_GENERATED_KEYS);
-        ps.setString(1, String.valueOf(request.getInt("groups_id")));
-        ps.setString(2, String.valueOf(request.getInt("students_id")));
-        ps.setString(2, String.valueOf(request.getInt("semesters_id")));
+        PreparedStatement ps = DBManager.getConnection().prepareStatement("INSERT INTO semesters(year,index,groups_id) VALUES(?,?,?)", PreparedStatement.RETURN_GENERATED_KEYS);
+        ps.setString(1, String.valueOf(request.getInt("year")));
+        ps.setString(2, request.getString("index"));
+        ps.setString(3, String.valueOf(request.getInt("groups_id")));
         ps.execute();
         rs = ps.getGeneratedKeys();
-
         rs.next();
         int id = rs.getInt("id");
         result.put("id", id);

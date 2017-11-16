@@ -6,7 +6,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import spark.Request;
 import spark.Response;
-import spark.Route;
 
 import java.sql.ResultSet;
 import java.sql.Statement;
@@ -14,14 +13,16 @@ import java.sql.Statement;
 /**
  * Created by vh on 11/2/17.
  */
-public class ListUsers extends MyRoute {
+public class ListUsers extends JSONRoute {
 
     @Override
-    public Object myHandle(Request request, Response response) throws Exception {
+    public JSONObject handleJSONRequest(JSONObject request) throws Exception {
         Statement statement = DBManager.getConnection().createStatement();
         ResultSet resultSet = statement.executeQuery("SELECT * FROM users");
 
+        JSONObject result = new JSONObject();
         JSONArray users = new JSONArray();
+        result.put("users", users);
         while (resultSet.next()) {
             JSONObject user = new JSONObject();
 
@@ -34,6 +35,6 @@ public class ListUsers extends MyRoute {
             users.put(user);
         }
 
-        return users;
+        return result;
     }
 }

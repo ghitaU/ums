@@ -1,5 +1,7 @@
 
 import com.course.ums.ws.*;
+import com.course.ums.ws.user.StudentAdd;
+import com.course.ums.ws.user.TeacherAdd;
 import org.json.JSONObject;
 import spark.Request;
 import spark.Response;
@@ -22,12 +24,18 @@ public class Test {
         Spark.post("/user/add", new AddUser());
         Spark.post("/user/list", new ListUsers());
         Spark.get("/user/list", new ListUsers());
-        Spark.post("/user/authenticate", new Authenticate());
-        Spark.get("/user/authenticate", new Authenticate());
-        Spark.post("/user/users/add", new AddUsers());
-        Spark.post("/user/course/add", new AddCourse());
-        Spark.post("/user/semester/add", new AddSemester());
-        Spark.post("/user/group/add", new AddGroup());
+        //my work
+//        Spark.post("/user/authenticate", new Authenticate());
+//        Spark.get("/user/authenticate", new Authenticate());
+//        Spark.post("/user/users/add", new AddUsers());
+        //course exemple
+        Spark.post("user/authenticate", new Authenticate());
+        Spark.post("user/student/add", new StudentAdd());
+        Spark.post("user/teacher/add", new TeacherAdd());
+
+        Spark.post("/course/add", new CourseAdd());
+        Spark.post("/semester/add", new SemesterAdd());
+        Spark.post("/group/add", new GroupAdd());
         Spark.post("/teacher/course/add", new AddTeacherCourse());
         Spark.post("/teacher/course/remove", new RemoveTeacherCourse());
         Spark.post("/group/teacher/add", new AddGroupTeacher());
