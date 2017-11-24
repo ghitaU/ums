@@ -2,6 +2,7 @@ package com.course.ums.ws.user;
 
 import com.course.ums.auth.AuthManager;
 import com.course.ums.db.DBManager;
+import com.course.ums.ws.AddEntityRoute;
 import com.course.ums.ws.JSONRoute;
 import org.json.JSONObject;
 
@@ -15,14 +16,15 @@ import java.util.Date;
 /**
  * Created by vh on 11/9/17.
  */
-public class TeacherAdd extends JSONRoute {
-    @Override
-    public JSONObject handleJSONRequest(JSONObject request) throws Exception {
-        String token = request.getString("token");
-        if(!DBManager.validateToken(token, AuthManager.ROLE_ADMIN)) {
-            throw new RuntimeException("Unauthorized!");
-        }
+public class AddTeacher extends AddEntityRoute {
 
+    @Override
+    public String[] getAuthorizedRoles() {
+        return new String[]{AuthManager.ROLE_ADMIN};
+    }
+
+    @Override
+    public int addEntity(JSONObject request) throws Exception {
         int id = DBManager.addUser(request);
 
         PreparedStatement ps = DBManager.getConnection().prepareStatement("INSERT INTO teachers(id, level) VALUES(?, ?)");
@@ -30,8 +32,7 @@ public class TeacherAdd extends JSONRoute {
         ps.setInt(2, request.getInt("level"));
         ps.execute();
 
-        JSONObject result = new JSONObject();
-        result.put("id", id);
+        return id;
+    }
 
-        return result;    }
 }
