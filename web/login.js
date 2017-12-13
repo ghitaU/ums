@@ -10,9 +10,10 @@ $(document).ready(function () {
         jQuery.ajax({
             method: "POST",
             data: JSON.stringify(payload),
-            url: App.constants.basePath + 'user/authenticate',
+            url: App.constants.baseApiPath + 'user/authenticate',
             success: function(resp) {
-                console.log(resp);
+                App.ss.set('auth', resp);
+                window.location.href = App.constants.baseUrl + 'dashboard.html'
             },
             error: function(e) {
                 console.log(e)

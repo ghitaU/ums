@@ -4,6 +4,7 @@ import com.course.ums.ws.course.AddCourse;
 import com.course.ums.ws.course.ListCourses;
 import com.course.ums.ws.exam.AddExam;
 import com.course.ums.ws.exam.ListExams;
+import com.course.ums.ws.exam.ListViewExams;
 import com.course.ums.ws.group.AddGroup;
 import com.course.ums.ws.group.ListGroups;
 import com.course.ums.ws.groupStudent.AddGroupStudent;
@@ -59,13 +60,14 @@ public class Test {
         Spark.post("semester/list", new ListSemesters());
         Spark.post("group/list", new ListGroups());
         Spark.post("/exam/list", new ListExams());
+        Spark.post("exam/list_view", new ListViewExams());
 
         //remove
         Spark.post("/teacher/course/remove", new RemoveTeacherCourse());
         Spark.post("/group/teacher/remove", new RemoveGroupTeacher());
         Spark.post("/group/student/remove", new RemoveGroupStudent());
 
-
+        //this is just for test
         JSONObject test = new JSONObject();
         test.put("id", 0);
         test.put("text", "hello world");
